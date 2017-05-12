@@ -1,4 +1,3 @@
-
 #include <QtWidgets>
 #ifndef QT_NO_PRINTER
 #include <QPrinter>
@@ -43,7 +42,7 @@ QImage ScribbleArea::image(){
 bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
 //! [3] //! [4]
 {
-    QImage visibleImage = image;
+    QImage visibleImage = m_image;
     resizeImage(&visibleImage, size());
 
     if (visibleImage.save(fileName, fileFormat)) {
@@ -111,7 +110,7 @@ void ScribbleArea::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     QRect dirtyRect = event->rect();
-    painter.drawImage(dirtyRect, image, dirtyRect);
+    painter.drawImage(dirtyRect, m_image, dirtyRect);
 }
 //! [14]
 
@@ -119,10 +118,10 @@ void ScribbleArea::paintEvent(QPaintEvent *event)
 void ScribbleArea::resizeEvent(QResizeEvent *event)
 //! [15] //! [16]
 {
-    if (width() > image.width() || height() > image.height()) {
-        int newWidth = qMax(width() + 128, image.width());
-        int newHeight = qMax(height() + 128, image.height());
-        resizeImage(&image, QSize(newWidth, newHeight));
+    if (width() > m_image.width() || height() > m_image.height()) {
+        int newWidth = qMax(width() + 128, m_image.width());
+        int newHeight = qMax(height() + 128, m_image.height());
+        resizeImage(&m_image, QSize(newWidth, newHeight));
         update();
     }
     QWidget::resizeEvent(event);
@@ -133,7 +132,7 @@ void ScribbleArea::resizeEvent(QResizeEvent *event)
 void ScribbleArea::drawLineTo(const QPoint &endPoint)
 //! [17] //! [18]
 {
-    QPainter painter(&image);
+    QPainter painter(&m_image);
     painter.setPen(QPen(myPenColor, myPenWidth, Qt::SolidLine, Qt::RoundCap,
                         Qt::RoundJoin));
     painter.drawLine(lastPoint, endPoint);
@@ -172,11 +171,11 @@ void ScribbleArea::print()
     if (printDialog.exec() == QDialog::Accepted) {
         QPainter painter(&printer);
         QRect rect = painter.viewport();
-        QSize size = image.size();
+        QSize size = m_image.size();
         size.scale(rect.size(), Qt::KeepAspectRatio);
         painter.setViewport(rect.x(), rect.y(), size.width(), size.height());
-        painter.setWindow(image.rect());
-        painter.drawImage(0, 0, image);
+        painter.setWindow(m_image.rect());
+        painter.drawImage(0, 0, m_image);
     }
 #endif // QT_NO_PRINTER
 }

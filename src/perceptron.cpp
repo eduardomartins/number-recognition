@@ -1,43 +1,62 @@
 #include "perceptron.h"
 
 
-Perceptron::Perceptron(QObject *parent)
+Perceptron::Perceptron(int size, QObject *parent)
     : QObject(parent)
-    , learning_rate(0.0)
-    , weights(nullptr)
 {
-
+    weights.size = size;
+    weights.array = new double[size];
 }
 
-Perceptron::Perceptron(const QList<double> &weights, QObject *parent)
+Perceptron::Perceptron(const Weight &weight, QObject *parent)
     : QObject(parent)
-    , learning_rate(0.0)
-    , weights(nullptr)
+
 {
-    this->weights = weights;
+    this->weights = weight;
 }
 
-static void Perceptron::setLearningRate(double rate)
-{
-    learning_rate = rate;
-}
 
-double Perceptron::activate(const QList<double> &inputs){
+double Perceptron::activate(const Weight &input){
     double result = 0;
 
     // Activate function
-    for(int i = 0; i < weights->size();i++)
-        result += inputs.at(i) * weights->at(i);
+    for(int i = 0; i < weights.size;i++)
+        result += input.array[i] * weights.array[i];
 
     return result;
 }
 
 
-double Perceptron::trainning(const QList<double> &inputs, double expected){
-    double error = 0.5 * pow((expected - activate(inputs)), 2.0);
+void Perceptron::trainning(const Weight &input, double learningRate, double expected){
+    double error = 0.5 * pow((expected - activate(input)), 2.0);
+    int i;
 
     // Update weights
-    for(int i = 0; i < weights->size();i++)
-        weights[i] += learning_rate * error * inputs[i];
+    for(i = 0; i < weights.size;i++)
+        weights.array[i] += learningRate * error * input.array[i];
+
+    weights.size = i;
 
 }
+
+Weight Perceptron::weight(void)
+{
+    return weights;
+}
+
+
+Weight Perceptron::weight(void) const
+{
+    return weights;
+}
+
+
+
+Perceptron& Perceptron::operator=(const Perceptron &other)
+{
+    weights.array = other.weight().array;
+    weights.size = other.weight().size;
+    return *this;
+
+}
+

@@ -1,12 +1,11 @@
 #ifndef SCRIBBLEAREA_H
 #define SCRIBBLEAREA_H
 
-
-
 #include <QColor>
 #include <QImage>
 #include <QPoint>
 #include <QWidget>
+
 
 class ScribbleArea : public QWidget
 {

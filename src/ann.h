@@ -1,121 +1,165 @@
 #ifndef ANN_H
 #define ANN_H
 
-#include <QList>
 #include <QDebug>
 #include <QtGlobal>
 #include <QSettings>
 
 #include "perceptron.h"
 
-const int totalEntryLayer = 400;
+#define ENTRY_LAYER 400
+#define INNER_LAYER 300
+#define END_LAYER 10
 
-const int totalInnerLayer = 300;
-
-const int totalEndLayer = 10;
-
-
-/*void saveState(){
-    settings.beginWriteArray("ServerItems");
+#include <QObject>
 
 
-    for (int i = 0; i < myvalue.size(); ++i) {
-        settings.setArrayIndex(i);
-        settings.setValue("ServerItem", list.at(i).myvalue);
-    }
+namespace settingsVar
+{
 
-    settings.endArray();
+const double learnnigRate = 0.3;
+const int epocas = 30;
 
-}*/
-
-
-
-double random_double(){
-    return (double) ((qrand() % 100) + 1)/ 100.0;
 }
 
 
-void ann(){
+const int totalEndLayer = END_LAYER;
 
-    QSettings settings;
+const int totalEntryLayer = ENTRY_LAYER;
 
-    // load intial weights
-
-    QList<double> initial;
+const int totalInnerLayer = INNER_LAYER;
 
 
-    // Load entry layer
-    QList<Perceptron> entryLayer;
+double random_double(){
+    return ((qrand() % 100) + 1.0)/ 100.0;
+}
 
-    settings.beginGroup("Entry layer");
 
-    settings.beginReadArray(QString("index"));
+class ANN: QObject {
 
-    for (int i = 0; i < totalEntryLayer; ++i) {
+    Q_OBJECT
 
-        settings.setArrayIndex(i);
+public:
 
-        initial[i] = settings.value("weight", random_double()).toDouble();
-
-        entryLayer[i]Perceptron(initial);
-
-        qDebug() << entryLayer[i];
+    static ANN & getInstance()
+    {
+        static ANN instance;
+        return instance;
     }
 
-    settings.endArray();
+    ANN(ANN const&)             = delete;
+    void operator=(ANN const&)  = delete;
 
+    static void setup(){
+        // load intial weights
 
-    // Load inner layer
-    QList<Perceptron> innerLayer;
+        int i;
+        Weight buffer;
+        QSettings settings;
 
-    settings.beginGroup("Inner layer");
+        double bias[1], entry[ENTRY_LAYER], inner[ENTRY_LAYER];
 
-    for(int j = 0; j < totalInnerLayer; j++){
+        // Load entry layer
 
-        settings.beginReadArray(QString("index-%1").arg(QString::number(j)));
+        settings.beginGroup("Entry layer");
+
+        settings.beginReadArray(QString("index"));
 
         for (int i = 0; i < totalEntryLayer; ++i) {
 
             settings.setArrayIndex(i);
 
-            initial[i] = settings.value("weight", random_double()).toDouble();
+            bias[i] = settings.value("weight", random_double()).toDouble();
+
+            buffer.size = 1;
+            buffer.array = bias;
+
+            entryLayer[i] = Perceptron(buffer);
+
+            qDebug() << bias[i];
         }
 
         settings.endArray();
 
-        innerLayer[j] = Perceptron(initial);
 
-        qDebug() << innerLayer[j];
+        // Load inner layer
 
-    }
+        settings.beginGroup("Inner layer");
 
-    settings.endGroup();
 
-    // Load inner layer
-    QList<Perceptron> endLayer;
+        for(int j = 0; j < totalInnerLayer; j++){
 
-    settings.beginGroup("End layer");
+            settings.beginReadArray(QString("index-%1").arg(QString::number(j)));
 
-    for(int j = 0; j < totalEndLayer; j++){
+            for (i = 0; i < totalEntryLayer; ++i) {
 
-        settings.beginReadArray(QString("index-%1").arg(QString::number(j)));
+                settings.setArrayIndex(i);
 
-        for (int i = 0; i < totalInnerLayer; ++i) {
+                entry[i] = settings.value("weight", random_double()).toDouble();
 
-            settings.setArrayIndex(i);
+                qDebug() << entry[i];
+            }
 
-            initial[i] = settings.value("weight", random_double()).toDouble();
+            buffer.size = i;
+
+            buffer.array = entry;
+
+            settings.endArray();
+
+            innerLayer[j] = Perceptron(buffer);
+
+
         }
 
-        settings.endArray();
+        settings.endGroup();
 
-        endLayer[j] = Perceptron(initial);
+        // Load inner layer
 
-        qDebug() << endLayer[j];
+        settings.beginGroup("End layer");
+
+        for(int j = 0; j < totalEndLayer; j++){
+
+            settings.beginReadArray(QString("index-%1").arg(QString::number(j)));
+
+            for (i = 0; i < totalInnerLayer; ++i) {
+
+                settings.setArrayIndex(i);
+
+                inner[i] = settings.value("weight", random_double()).toDouble();
+
+                qDebug() << inner[i];
+            }
+
+            settings.endArray();
+
+            buffer.array = inner;
+            buffer.size = i;
+
+            endLayer[j] = Perceptron(buffer);
+
+        }
+
+        settings.endGroup();
 
     }
 
-    settings.endGroup();
+private:
+
+    ANN(QObject *parent = nullptr): QObject(parent){
+
+        entryLayer = new Perceptron[ENTRY_LAYER];
+
+        innerLayer = new Perceptron[INNER_LAYER];
+
+        endLayer = new Perceptron[END_LAYER];
+
+    }
+
+    Perceptron *entryLaye;
+
+    Perceptron *innerLayer;
+
+    Perceptron *endLayer;
 
 }
 

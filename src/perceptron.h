@@ -7,21 +7,34 @@
 #include <math.h>
 
 
+typedef struct {
+    double *array;
+    int size;
+
+} Weight;
+
+
+
 class Perceptron : public QObject
 {
     Q_OBJECT
 
 public:
 
-    Perceptron(QObject *parent = 0);
+    Perceptron(int size = 0, QObject *parent = 0);
 
-    Perceptron(const QList<double> &weights, QObject *parent = 0);
+    Perceptron(const Weight &weights, QObject *parent = 0);
 
-    static void setLearningRate(double rate);
+    Weight weight(void);
 
-    double activate(const QList<double> &inputs);
+    Weight weight(void) const;
 
-    double trainning(const QList<double> &inputs, double expected);
+    double activate(const Weight &inputs);
+
+    void trainning(const Weight &inputs, double learningRate, double expected);
+
+    Perceptron& operator=(const Perceptron &other);
+
 
 signals:
 
@@ -29,8 +42,6 @@ public slots:
 
 private:
 
-    static double learning_rate;
-    QList<double> *weights;
+    Weight weights;
 };
-
 #endif // PERCEPTRON_H

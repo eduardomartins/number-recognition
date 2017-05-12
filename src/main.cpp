@@ -2,7 +2,7 @@
 #include <QApplication>
 
 #include "ann.h"
-#include "mainwindow.h"
+#include "src/mainwindow.h"
 
 
 int main(int argc, char *argv[])
@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("www.eduardomartins.site");
     QCoreApplication::setApplicationName("Number Recognition");
 
-    ann();
+    setup();
 
     QApplication app(argc, argv);
     MainWindow window;
