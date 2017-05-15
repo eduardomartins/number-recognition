@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>526</width>
+    <width>363</width>
     <height>320</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Number Recognation</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -21,15 +21,12 @@
        <string>Processing</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="1" column="0">
-        <widget class="QProgressBar" name="progressBar">
-         <property name="value">
-          <number>0</number>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string/>
          </property>
         </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QGraphicsView" name="graphicsView"/>
        </item>
       </layout>
      </widget>
@@ -41,7 +38,14 @@
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0">
-        <widget class="ScribbleArea" name="widgetDraw" native="true"/>
+        <widget class="ScribbleArea" name="widgetDraw" native="true">
+         <property name="baseSize">
+          <size>
+           <width>100</width>
+           <height>100</height>
+          </size>
+         </property>
+        </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLineEdit" name="lineEdit">
@@ -105,7 +109,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>526</width>
+     <width>363</width>
      <height>19</height>
     </rect>
    </property>

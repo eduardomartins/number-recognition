@@ -12,28 +12,90 @@
 #define END_LAYER 10
 
 #include <QObject>
-
+#include <QVector>
 
 namespace settingsVar
 {
 
 const double learnnigRate = 0.3;
+
 const int epocas = 30;
 
 }
 
 
-const int totalEndLayer = END_LAYER;
-
-const int totalEntryLayer = ENTRY_LAYER;
-
-const int totalInnerLayer = INNER_LAYER;
-
-
-double random_double(){
+inline double random_double(){
     return ((qrand() % 100) + 1.0)/ 100.0;
 }
 
+class PerceptronLayer: public QObject
+{
+    Q_OBJECT
+public:
+
+    PerceptronLayer(int size, QObject *parent = nullptr):
+        QObject(parent)
+    {
+        layer = new QVector<Perceptron>(size);
+    }
+
+
+    PerceptronLayer(int size, int index, QObject *parent = nullptr):
+        QObject(parent)
+    {
+        layer = new QVector<Perceptron>(size);
+        layer_index = index;
+    }
+
+
+    void setLayerIndex(int index)
+    {
+        layer_index = index;
+    }
+
+    /*Perceptron &operator[](size_t index)
+    {
+        return layer[index];
+    }
+
+    const Perceptron &operator[](size_t index) const
+    {
+        return layer[index];
+    }*/
+
+    void setup()
+    {
+        settings.beginGroup(QString("layer-%1").arg(QString::number(layer_index)));
+
+        int weight_size = settings.value(QString('size'), 0).toInt();
+
+        double weights[weight_size];
+
+        Perceptron *data = layer->data();
+
+        for(int j = 0; j < layer->size(); j++)
+        {
+            settings.beginReadArray(QString("index-%1").arg(QString::number(j)));
+
+            for (int i = 0; i < weight_size; ++i)
+            {
+                settings.setArrayIndex(i);
+                weights[i] = settings.value("weight", random_double()).toDouble();
+            }
+
+            settings.endArray();
+            data[j] = Perceptron(weights, weight_size);
+
+        }
+        settings.endGroup();
+    }
+
+private:
+
+    int layer_index;
+    QSettings settings;
+    QVector<Perceptron> *layer;
+};
 
 class ANN: QObject {
 
@@ -50,117 +112,33 @@ public:
     ANN(ANN const&)             = delete;
     void operator=(ANN const&)  = delete;
 
-    static void setup(){
-        // load intial weights
-
-        int i;
-        Weight buffer;
-        QSettings settings;
-
-        double bias[1], entry[ENTRY_LAYER], inner[ENTRY_LAYER];
-
-        // Load entry layer
-
-        settings.beginGroup("Entry layer");
-
-        settings.beginReadArray(QString("index"));
-
-        for (int i = 0; i < totalEntryLayer; ++i) {
-
-            settings.setArrayIndex(i);
-
-            bias[i] = settings.value("weight", random_double()).toDouble();
-
-            buffer.size = 1;
-            buffer.array = bias;
-
-            entryLayer[i] = Perceptron(buffer);
-
-            qDebug() << bias[i];
-        }
-
-        settings.endArray();
-
-
-        // Load inner layer
-
-        settings.beginGroup("Inner layer");
-
-
-        for(int j = 0; j < totalInnerLayer; j++){
-
-            settings.beginReadArray(QString("index-%1").arg(QString::number(j)));
-
-            for (i = 0; i < totalEntryLayer; ++i) {
-
-                settings.setArrayIndex(i);
-
-                entry[i] = settings.value("weight", random_double()).toDouble();
-
-                qDebug() << entry[i];
-            }
-
-            buffer.size = i;
-
-            buffer.array = entry;
-
-            settings.endArray();
-
-            innerLayer[j] = Perceptron(buffer);
-
-
-        }
-
-        settings.endGroup();
-
-        // Load inner layer
-
-        settings.beginGroup("End layer");
-
-        for(int j = 0; j < totalEndLayer; j++){
-
-            settings.beginReadArray(QString("index-%1").arg(QString::number(j)));
-
-            for (i = 0; i < totalInnerLayer; ++i) {
-
-                settings.setArrayIndex(i);
-
-                inner[i] = settings.value("weight", random_double()).toDouble();
-
-                qDebug() << inner[i];
-            }
-
-            settings.endArray();
-
-            buffer.array = inner;
-            buffer.size = i;
-
-            endLayer[j] = Perceptron(buffer);
-
-        }
-
-        settings.endGroup();
-
+    ~ANN()
+    {
+        delete entryLayer;
+        delete innerLayer;
+        delete endLayer;
     }
+
 
 private:
 
-    ANN(QObject *parent = nullptr): QObject(parent){
+    PerceptronLayer *entryLayer;
+    PerceptronLayer *innerLayer;
+    PerceptronLayer *endLayer;
 
-        entryLayer = new Perceptron[ENTRY_LAYER];
+    ANN(QObject *parent = nullptr)
+        : QObject(parent)
+    {
 
-        innerLayer = new Perceptron[INNER_LAYER];
+        entryLayer = new PerceptronLayer(ENTRY_LAYER, 0);
 
-        endLayer = new Perceptron[END_LAYER];
+        innerLayer = new PerceptronLayer(INNER_LAYER, 1);
+
+        endLayer = new PerceptronLayer(END_LAYER, 2);
 
     }
 
-    Perceptron *entryLaye;
+};
 
-    Perceptron *innerLayer;
-
-    Perceptron *endLayer;
-
-}
 
 #endif // ANN_H

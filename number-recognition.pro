@@ -11,6 +11,7 @@ TARGET = app.bin
 
 # Input
 HEADERS += \
+        src/ui_mainwindow.h \
         src/mainwindow.h \
 	src/scribblearea.h \
 	src/perceptron.h \
@@ -30,4 +31,13 @@ OBJECTS_DIR = bin/.obj
 MOC_DIR = bin/.moc
 RCC_DIR = bin/.rcc
 UI_DIR = bin/.ui
+
+debug
+{
+    DESTDIR = bin
+    OBJECTS_DIR = bin/.obj
+    MOC_DIR = bin/.moc
+    RCC_DIR = bin/.rcc
+    UI_DIR = bin/.ui
+}
 
